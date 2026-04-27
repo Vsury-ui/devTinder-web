@@ -6,8 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
-  const [email, setEmail] = useState("pss@gmail.com");
-  const [password, setPassword] = useState("Pvs@1993");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLoginForm, setIsLoginForm] = useState(false);
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -30,11 +34,52 @@ const Login = () => {
     }
   };
 
+  const handleSignUp = async () => {
+    try {
+      const res = await axios.post(
+        BASE_URL + "/signup",
+        { firstName, lastName, email, password },
+        { withCredentials: true },
+      );
+      dispatch(addUser(res?.data?.data));
+      navigate("/profile");
+    } catch (err) {
+      setError(err?.response?.data || "Something went wrong");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex justify-center my-10">
       <div className="card bg-base-300 w-96 shadow-sm">
         <div className="card-body">
-          <h2 className="card-title justify-center">Login</h2>
+          <h2 className="card-title justify-center">
+            {isLoginForm ? "Login" : "Sign Up"}
+          </h2>
+          {!isLoginForm && (
+            <>
+              <div className="form-control">
+                <label className="input validator my-2">
+                  <span className="label">First name</span>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className="form-control">
+                <label className="input validator my-2">
+                  <span className="label">First name</span>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </label>
+              </div>
+            </>
+          )}
           <div className="form-control">
             <label className="input validator my-2">
               <svg
@@ -102,10 +147,21 @@ const Login = () => {
           </div>
           <p className="text-red-500">{error}</p>
           <div className="card-actions flex justify-center">
-            <button className="btn btn-primary" onClick={onLogin}>
-              Login
+            <button
+              className="btn btn-primary"
+              onClick={isLoginForm ? onLogin : handleSignUp}
+            >
+              {isLoginForm ? "Login" : "Sign Up"}
             </button>
           </div>
+          <p
+            className="mx-auto cursor-pointer py-2"
+            onClick={() => setIsLoginForm((value) => !value)}
+          >
+            {isLoginForm
+              ? " New User ? sign Up here"
+              : "Existing User? Login Here"}
+          </p>
         </div>
       </div>
     </div>
